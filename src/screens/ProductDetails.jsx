@@ -3,17 +3,18 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  Touchable,
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import Header from '../components/Header';
 import LinearGradient from 'react-native-linear-gradient';
 import {colors} from '../utils/colors';
 import {responsiveWidth} from 'react-native-responsive-dimensions';
-import cart from './../data/cart.json';
-import {useRoute} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import {fonts} from '../utils/fonts';
+import {CartContext} from '../context/CartContext';
+import Toast from 'react-native-toast-message';
 
 const sizes = ['S', 'M', 'L', 'XL'];
 const color = ['#91A1B0', '#B11D1DD4', '#1F44A3C2', '#9F632AD4', '#1D752BDB'];
@@ -23,17 +24,25 @@ const ProductDetails = () => {
   const {item} = route.params;
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
+  const {addCart} = useContext(CartContext);
+  const navigation = useNavigation();
 
-  const handleAddToCart=()=>{
-    
-  }
+  const handleAddToCart = () => {
+    addCart({...item, color: selectedColor, size: selectedSize});
+    // navigation.navigate('Cart');
+    Toast.show({
+      text1: 'Cart Added Succefull',
+      type: 'success',
+      position: 'bottom',
+    });
+  };
 
   return (
     <LinearGradient
       colors={[colors.linearGradientOne, colors.linearGradientTwo]}
       style={styles.container}>
       <View style={styles.headerContainer}>
-        <Header />
+        <Header isNotHome={true} />
       </View>
       <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
         <Image source={{uri: item.image}} style={styles.coverImage} />
@@ -75,12 +84,11 @@ const ProductDetails = () => {
             </View>
           ))}
         </View>
-        <TouchableOpacity
-          style={styles.btnContainer}
-          onPress={() => cart.cart.push(item)}>
+        <TouchableOpacity onPress={handleAddToCart} style={styles.btnContainer}>
           <Text style={styles.btnText}>Add to Cart</Text>
         </TouchableOpacity>
       </ScrollView>
+      <Toast />
     </LinearGradient>
   );
 };
@@ -103,8 +111,9 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   title: {
+    fontFamily: fonts.medium,
     fontSize: 20,
-    fontWeight: '500',
+    // fontWeight: '500',
     color: '#444444',
   },
   price: {
@@ -115,8 +124,8 @@ const styles = StyleSheet.create({
   sizeContainer: {
     marginHorizontal: 20,
     flexDirection: 'row',
-    gap: 25,
-    padding: 10,
+    gap: 15,
+    // padding: 10,
   },
   sizeTextContainer: {
     width: 36,
@@ -135,7 +144,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginHorizontal: 20,
-    marginTop: 10,
+    // marginTop: 5,
   },
   circle: {
     width: 36,
@@ -160,8 +169,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   btnText: {
-    fontWeight: '600',
-    fontSize: 24,
+    fontFamily: fonts.semiBold,
+    fontSize: 22,
     color: '#FFFFFF',
   },
 });

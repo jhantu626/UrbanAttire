@@ -1,19 +1,40 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {
+  Image,
+  StyleSheet,
+  Text,
+  Touchable,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React from 'react';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {fonts} from '../utils/fonts';
+import {useNavigation} from '@react-navigation/native';
 
-const Header = () => {
+const Header = ({
+  isNotHome = false,
+  isCart = false,
+  imageUrl = './../../assets/images/defaultUser.png',
+}) => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
-      <View style={styles.appIconContainer}>
-        <Image
-          source={require('./../../assets/images/apps.png')}
-          style={styles.appIcon}
-        />
-      </View>
-      <Image
-        style={styles.dp}
-        source={require('./../../assets/images/profile.png')}
-      />
+      {isNotHome ? (
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.appIconContainer}>
+          <Ionicons name={'chevron-back'} size={24} color={'#E96E6E'} />
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.appIconContainer}>
+          <Image
+            source={require('./../../assets/images/apps.png')}
+            style={styles.appIcon}
+          />
+        </View>
+      )}
+      {isCart && <Text style={styles.myCart}>My Cart</Text>}
+      <Image style={styles.dp} source={require('./../../assets/images/defaultUser.png')} />
     </View>
   );
 };
@@ -22,7 +43,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   appIconContainer: {
     backgroundColor: '#FFFFFF',
@@ -40,6 +61,10 @@ const styles = StyleSheet.create({
     height: 44,
     width: 44,
     borderRadius: 22,
+  },
+  myCart: {
+    fontFamily: fonts.regular,
+    fontSize: 28,
   },
 });
 

@@ -2,12 +2,13 @@ import {useNavigation} from '@react-navigation/native';
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {responsiveWidth} from 'react-native-responsive-dimensions';
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {fonts} from '../utils/fonts';
 
 const ProductCard = ({item, handleLiked}) => {
   const navigation = useNavigation();
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate('ProductDetails',{'item': item})}
+      onPress={() => navigation.navigate('ProductDetails', {item: item})}
       style={styles.container}>
       <Image
         source={{
@@ -46,8 +47,9 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   title: {
+    fontFamily: fonts.regular,
     fontSize: 18,
-    fontWeight: '500',
+    // fontWeight: '500',
     color: '#000000',
   },
   price: {

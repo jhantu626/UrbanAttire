@@ -1,17 +1,13 @@
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import React, { useState} from 'react';
+import {FlatList, StyleSheet, Text, TextInput, View} from 'react-native';
+import React, {useContext, useState} from 'react';
 import ApplicationWrapper from '../components/ApplicationWrapper';
 import Header from '../components/Header';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Category from '../components/Category';
 import ProductCard from '../components/ProductCard';
 import data from './../data/data.json';
+import {fonts} from '../utils/fonts';
+import {CartContext} from '../context/CartContext';
 
 const categories = ['Tranding Now', 'All', 'New', 'Mens', 'Women'];
 
@@ -21,7 +17,7 @@ const Home = () => {
 
   const handleLiked = item => {
     const newProducts = products.map(data => {
-      if (data.id == item.id) {
+      if (data.id === item.id) {
         return {...data, isLiked: true};
       }
       return data;
@@ -65,10 +61,7 @@ const Home = () => {
         }
         data={products}
         renderItem={({item, index}) => (
-          <ProductCard
-            item={item}
-            handleLiked={handleLiked}
-          />
+          <ProductCard item={item} handleLiked={handleLiked} />
         )}
         keyExtractor={item => item.id}
         numColumns={2}
@@ -87,9 +80,10 @@ const styles = StyleSheet.create({
     // backgroundColor: 'red'
   },
   matchText: {
+    fontFamily: fonts.semiBold,
     fontSize: 28,
     color: 'black',
-    marginVertical: 20,
+    marginVertical: 10,
   },
   inputContainer: {
     height: 48,
@@ -103,6 +97,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
   },
   inputField: {
+    fontFamily: fonts.light,
     flex: 1,
     fontSize: 18,
   },

@@ -1,5 +1,6 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
+import { fonts } from '../utils/fonts';
 
 const Category = ({item, selectedCategory, setSelectedCategory}) => {
   const isSelected = selectedCategory === item;
@@ -15,6 +16,7 @@ const Category = ({item, selectedCategory, setSelectedCategory}) => {
 
 const styles = StyleSheet.create({
   categoryText: {
+    fontFamily: fonts.regular,
     fontSize: 16,
     fontWeight: '600',
     color: '#938F8F',
