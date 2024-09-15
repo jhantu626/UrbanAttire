@@ -6,17 +6,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {fonts} from '../utils/fonts';
 import {useNavigation} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Header = ({
-  isNotHome = false,
-  isCart = false,
-  imageUrl = './../../assets/images/defaultUser.png',
-}) => {
+const Header = ({isNotHome = false, isCart = false, imageUrl = null}) => {
   const navigation = useNavigation();
+  const [profilePic, setProfilePic] = useState(null);
+
   return (
     <View style={styles.container}>
       {isNotHome ? (
@@ -27,14 +26,28 @@ const Header = ({
         </TouchableOpacity>
       ) : (
         <View style={styles.appIconContainer}>
-          <Image
-            source={require('./../../assets/images/apps.png')}
-            style={styles.appIcon}
-          />
+          {profilePic === null ? (
+            <Image
+              source={require('./../../assets/images/apps.png')}
+              style={styles.appIcon}
+            />
+          ) : (
+            <Image source={{uri: profilePic}} style={styles.appIcon} />
+          )}
         </View>
       )}
       {isCart && <Text style={styles.myCart}>My Cart</Text>}
-      <Image style={styles.dp} source={require('./../../assets/images/defaultUser.png')} />
+      {imageUrl === null ? (
+        <Image
+          style={styles.dp}
+          source={require('./../../assets/images/defaultUser.png')}
+        />
+      ) : (
+        <Image
+          style={styles.dp}
+          source={{uri: imageUrl}}
+        />
+      )}
     </View>
   );
 };

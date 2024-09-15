@@ -1,9 +1,10 @@
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   StyleSheet,
   Text,
-  Touchable,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -17,15 +18,22 @@ import Octicons from 'react-native-vector-icons/Octicons';
 import {fonts} from '../utils/fonts';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {userService} from '../services/UserService';
 import {launchImageLibrary} from 'react-native-image-picker';
-import Toast from 'react-native-toast-message';
+import Address from '../components/Address';
+import {ALERT_TYPE, Toast} from 'react-native-alert-notification';
+import {Buffer} from 'buffer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+global.Buffer = global.Buffer || Buffer;
 
 const Profile = () => {
   const {logout} = useContext(AuthContext);
   const [profile, setProfile] = useState({});
-  const [imageUri, setImageUri] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [mobile, setMobile] = useState();
+  const [isUpdatePh, setIsUpdatePh] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
   const profileData = async () => {
     const data = await userService.profile();
     console.log(data);
@@ -37,43 +45,69 @@ const Profile = () => {
       quality: 1,
     };
 
-    launchImageLibrary(option, response => {
+    launchImageLibrary(option, async response => {
       if (response.didCancel) {
-        Toast.show({type: 'error', text1: 'Canceled', position: 'top'});
+        Toast.show({
+          title: 'Profile Upload',
+          textBody: 'Upload Cancelled',
+          type: ALERT_TYPE.DANGER,
+        });
       } else if (response.errorCode) {
         Toast.show({
-          type: 'error',
-          position: 'top',
-          text1: 'Something went wrong!',
+          title: 'Profile Upload',
+          textBody: 'Something went wrong!',
+          type: ALERT_TYPE.DANGER,
         });
       } else {
-        const uri = response.assets[0].uri;
-        setImageUri(uri);
-        Toast.show({
-          type: 'info',
-          text1: 'Image Selected!',
-          position: 'top',
+        const file = response.assets[0];
+        const uri = file.uri;
+        const name = file.fileName;
+
+        //Upload file
+        const formData = new FormData();
+        formData.append('profile', {
+          uri,
+          name: name,
+          type: 'image/jpeg',
         });
+        const data = await userService.updateProfilePic(formData);
+        Toast.show({
+          title: 'Profile Upload',
+          textBody: data.msg,
+          type: ALERT_TYPE.SUCCESS,
+        });
+        await profileData();
       }
     });
-    if (!imageUri) {
-      Toast.show({
-        type: 'info',
-        text1: 'Please select an image!',
-        position: 'top',
-      });
-      return;
+  };
+
+  const refreshPage = async () => {
+    await profileData();
+    if (profile.profileUrl) {
+      const image = await userService.profilePic();
+      setProfileImage(prev => image);
+      console.log(image);
+      await AsyncStorage.setItem('profilePic', image);
     }
-    const body = new FormData();
-    body.append('profile', {
-      uri: imageUri,
-      type: 'image/jpeg',
+  };
+
+  const handleUpdateMobile = async () => {
+    setIsLoading(prev => !prev);
+    const data = await userService.updateMobileNumber(mobile);
+    await profileData();
+    setIsUpdatePh(false);
+    Toast.show({
+      title: 'Mobile Updation',
+      textBody: data.msg,
+      type: data.status ? ALERT_TYPE.SUCCESS : ALERT_TYPE.DANGER,
     });
-    await userService.updateProfilePic(body);
+    setIsLoading(prev => !prev);
   };
 
   useEffect(() => {
     profileData();
+    setMobile(profile.mobile);
+    refreshPage();
   }, []);
 
   return (
@@ -81,7 +115,6 @@ const Profile = () => {
       style={styles.container}
       colors={[colors.linearGradientOne, colors.linearGradientTwo]}>
       <ScrollView style={styles.appContainer}>
-        <Toast />
         {/* First back view */}
         <View style={{marginTop: 20, width: responsiveWidth(100)}}>
           <TouchableOpacity>
@@ -93,10 +126,7 @@ const Profile = () => {
         <View style={styles.profileContainer}>
           <View style={styles.profileView}>
             {profile.profileUrl ? (
-              <Image
-                source={{uri: profile.profileUrl}}
-                style={styles.profileImage}
-              />
+              <Image source={{uri: profileImage}} style={styles.profileImage} />
             ) : (
               <Image
                 source={require('./../../assets/images/defaultUser.png')}
@@ -123,59 +153,66 @@ const Profile = () => {
             <Text style={styles.inputText}>{profile.email}</Text>
           </View>
         </View>
+
         {/* Phone Number */}
-        <View style={styles.boxContainer}>
-          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={styles.boxText}>Phone Number</Text>
-            <TouchableOpacity>
-              <Text style={[styles.boxText, {textDecorationLine: 'underline'}]}>
-                Edit
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.textInputBox}>
-            <MaterialCommunityIcons name="phone" size={24} />
-            <Text style={styles.inputText}>
-              {profile.mobile ? '+91 9775746484' : 'Update Mobile'}
-            </Text>
-          </View>
-        </View>
-        {/* Address */}
         <View
           style={[
             styles.boxContainer,
-            {height: 200, borderWidth: 0.5, padding: 10, borderRadius: 12},
+            {borderWidth: 1, borderColor: '#F1ECEC', padding: 10},
           ]}>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text style={styles.boxText}>Address</Text>
-            <TouchableOpacity>
-              <Text style={[styles.boxText, {textDecorationLine: 'underline'}]}>
-                Edit
-              </Text>
+            <Text style={styles.boxText}>Phone Number</Text>
+            <TouchableOpacity onPress={() => setIsUpdatePh(prev => !prev)}>
+              {isUpdatePh ? (
+                <Text
+                  style={[styles.boxText, {textDecorationLine: 'underline'}]}>
+                  Cancel
+                </Text>
+              ) : (
+                <Text
+                  style={[styles.boxText, {textDecorationLine: 'underline'}]}>
+                  Edit
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
-          {profile.address ? (
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <View style={styles.textInputBox}>
+          {isUpdatePh ? (
+            <>
+              <View style={[styles.textInputBox, {alignItems: 'center'}]}>
                 <MaterialCommunityIcons name="phone" size={24} />
-                <Text style={styles.inputText}>+91 9775746484</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter Mobile Number"
+                  keyboardType="numeric"
+                  value={mobile}
+                  onChangeText={text => text.length <= 10 && setMobile(text)}
+                />
               </View>
-              <View style={styles.textInputBox}>
-                <MaterialCommunityIcons name="phone" size={24} />
-                <Text style={styles.inputText}>+91 9775746484</Text>
-              </View>
-              <View style={styles.textInputBox}>
-                <MaterialCommunityIcons name="phone" size={24} />
-                <Text style={styles.inputText}>+91 9775746484</Text>
-              </View>
-            </ScrollView>
+              <TouchableOpacity
+                onPress={handleUpdateMobile}
+                style={styles.updateBtn}>
+                {isLoading ? (
+                  <ActivityIndicator size={'large'} color={'#FFFFFF'} />
+                ) : (
+                  <Text style={styles.updateBtnText}>Update Address</Text>
+                )}
+              </TouchableOpacity>
+            </>
           ) : (
             <View style={styles.textInputBox}>
-              <MaterialCommunityIcons name="ladder" size={24} />
-              <Text style={styles.inputText}>Update Address</Text>
+              <MaterialCommunityIcons name="phone" size={24} />
+              <Text style={styles.inputText}>
+                {profile.mobile ? profile.mobile : 'Update Mobile'}
+              </Text>
             </View>
           )}
         </View>
+        {/* Address */}
+        <Address
+          address={profile.address !== null ? profile.address : {}}
+          isAddress={profile.address === null ? false : true}
+          refreshPage={refreshPage}
+        />
         {/* Logout Btn */}
         <TouchableOpacity style={styles.logoutContainer} onPress={logout}>
           <Entypo name="log-out" size={24} color={'#EE8924'} />
@@ -212,6 +249,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: 139,
     height: 139,
+    borderRadius: 69,
   },
   pencilContainer: {
     position: 'absolute',
@@ -246,7 +284,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#F1ECEC',
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     gap: 12,
     padding: 15,
     marginVertical: 5,
@@ -271,6 +309,31 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 16,
     color: '#EE8924',
+  },
+  inputText: {
+    flex: 1,
+    height: 54,
+    fontFamily: fonts.medium,
+    fontSize: 14,
+  },
+  textInput: {
+    flex: 1,
+    height: 54,
+    fontFamily: fonts.medium,
+    fontSize: 14,
+  },
+  updateBtn: {
+    height: 58,
+    backgroundColor: '#EE8924',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  updateBtnText: {
+    fontFamily: fonts.semiBold,
+    color: '#FFFFFF',
+    fontSize: 18,
   },
 });
 

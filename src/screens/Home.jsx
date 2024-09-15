@@ -1,5 +1,5 @@
 import {FlatList, StyleSheet, Text, TextInput, View} from 'react-native';
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import ApplicationWrapper from '../components/ApplicationWrapper';
 import Header from '../components/Header';
 import Fontisto from 'react-native-vector-icons/Fontisto';
@@ -8,12 +8,14 @@ import ProductCard from '../components/ProductCard';
 import data from './../data/data.json';
 import {fonts} from '../utils/fonts';
 import {CartContext} from '../context/CartContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const categories = ['Tranding Now', 'All', 'New', 'Mens', 'Women'];
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [products, setProducts] = useState(data.products);
+  const [profileImage, setProfileImge] = useState(null);
 
   const handleLiked = item => {
     const newProducts = products.map(data => {
@@ -25,9 +27,18 @@ const Home = () => {
     setProducts(newProducts);
   };
 
+  const syncProfileImage = async () => {
+    const data = await AsyncStorage.getItem('profilePic');
+    setProfileImge(data);
+  };
+
+  useEffect(() => {
+    syncProfileImage();
+  }, []);
+
   return (
     <ApplicationWrapper>
-      <Header />
+      <Header imageUrl={profileImage} />
 
       {/* PRODUCT CATEGORIES */}
       {/* PRODUCT CARD */}

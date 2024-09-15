@@ -18,6 +18,7 @@ import {AuthContext, AuthProvider} from './context/AuthContext';
 import OnboardingScreen from './screens/OnboardingScreen';
 import LoginHome from './screens/LoginHome';
 import SplashScreen from './screens/SplashScreen';
+import {AlertNotificationRoot} from 'react-native-alert-notification';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -44,7 +45,7 @@ const HomeChildStack = () => {
 const AuthStack = () => {
   return (
     <Stack.Navigator
-      initialRouteName="Profile"
+      initialRouteName="Splash"
       screenOptions={{headerShown: false}}>
       <Stack.Screen name="Splash" component={SplashScreen} />
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
@@ -146,7 +147,9 @@ const AppNav = () => {
 const App = () => {
   return (
     <AuthProvider>
-      <AppNav />
+      <AlertNotificationRoot>
+        <AppNav />
+      </AlertNotificationRoot>
     </AuthProvider>
   );
 };

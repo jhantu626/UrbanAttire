@@ -9,7 +9,7 @@ export const AuthProvider = ({children}) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const login = async (email, password) => {
-    const url = 'http://192.168.81.179:9001/api/v1/auth/login';
+    const url = 'http://192.168.43.179:9001/api/v1/auth/login';
     try {
       setIsLoading(true);
       const response = await axios.post(url, {
@@ -35,12 +35,12 @@ export const AuthProvider = ({children}) => {
     try {
       console.info('Register function started');
 
-      const URI = 'http://192.168.81.179:9001/api/v1/auth/register';
+      const URI = 'http://192.168.43.179:9001/api/v1/auth/register';
 
       const response = await axios.post(URI, {
         email: email,
         password: password,
-        name: name,
+        fullName: name,
       });
       console.info('Fetch request sent');
       const data = response.data;
