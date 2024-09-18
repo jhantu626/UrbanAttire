@@ -14,20 +14,27 @@ import Toast from 'react-native-toast-message';
 
 const CartCard = ({item}) => {
   const {removeCart} = useContext(CartContext);
+  console.log(item.item.product.imageUrl);
   return (
     <View style={styles.container}>
-      <Image source={{uri: item.item.image}} style={styles.coverImage} />
+      <Image
+        source={{uri: item.item.product.imageUrl}}
+        style={styles.coverImage}
+      />
       <View style={styles.cardContain}>
-        <Text style={styles.title}>{item.item.title}</Text>
-        <Text style={styles.price}>${item.item.price}</Text>
+        <Text style={styles.title}>{item.item.product.title}</Text>
+        <Text style={styles.price}>
+          {'\u20B9'}
+          {item.item.product.price}
+        </Text>
         <View style={styles.detailsContainer}>
           <View
             style={[
               styles.colorContainer,
-              {backgroundColor: item.item.color},
+              {backgroundColor: item.item.selectedColor.toLowerCase()},
             ]}></View>
           <View style={styles.sizeContainer}>
-            <Text style={styles.sizeText}>{item.item.size}</Text>
+            <Text style={styles.sizeText}>{item.item.selectedSize}</Text>
           </View>
         </View>
       </View>

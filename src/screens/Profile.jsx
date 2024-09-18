@@ -34,10 +34,13 @@ const Profile = () => {
   const [mobile, setMobile] = useState();
   const [isUpdatePh, setIsUpdatePh] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [imageLoading, setImageLoading] = useState(false);
+
   const profileData = async () => {
     const data = await userService.profile();
     console.log(data);
     setProfile(data);
+    await AsyncStorage.setItem('profileImageUrl',data.profileUrl);
   };
   const updateProfile = async () => {
     const option = {
@@ -59,6 +62,7 @@ const Profile = () => {
           type: ALERT_TYPE.DANGER,
         });
       } else {
+        setImageLoading(true);
         const file = response.assets[0];
         const uri = file.uri;
         const name = file.fileName;
@@ -77,18 +81,13 @@ const Profile = () => {
           type: ALERT_TYPE.SUCCESS,
         });
         await profileData();
+        setImageLoading(false);
       }
     });
   };
 
   const refreshPage = async () => {
     await profileData();
-    if (profile.profileUrl) {
-      const image = await userService.profilePic();
-      setProfileImage(prev => image);
-      console.log(image);
-      await AsyncStorage.setItem('profilePic', image);
-    }
   };
 
   const handleUpdateMobile = async () => {
@@ -124,14 +123,34 @@ const Profile = () => {
 
         {/* Profile Pic View */}
         <View style={styles.profileContainer}>
-          <View style={styles.profileView}>
-            {profile.profileUrl ? (
-              <Image source={{uri: profileImage}} style={styles.profileImage} />
+          <View style={[styles.profileView]}>
+            {imageLoading ? (
+              <View
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 75,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderWidth: 5,
+                  borderColor: '#EE8924'
+                }}>
+                <ActivityIndicator size={'large'} color={'#EE8924'} />
+              </View>
             ) : (
-              <Image
-                source={require('./../../assets/images/defaultUser.png')}
-                style={styles.profileImage}
-              />
+              <>
+                {profile.profileUrl ? (
+                  <Image
+                    source={{uri: profile.profileUrl}}
+                    style={styles.profileImage}
+                  />
+                ) : (
+                  <Image
+                    source={require('./../../assets/images/defaultUser.png')}
+                    style={styles.profileImage}
+                  />
+                )}
+              </>
             )}
             <TouchableOpacity
               style={styles.pencilContainer}

@@ -13,16 +13,29 @@ import {colors} from '../utils/colors';
 import Header from '../components/Header';
 import CartCard from '../components/CartCard';
 import {fonts} from '../utils/fonts';
-import {useContext} from 'react';
+import {useContext, useEffect, useState} from 'react';
 import {CartContext} from '../context/CartContext';
 import Toast from 'react-native-toast-message';
 import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
+import {cartService} from '../services/CartService';
 
 const Cart = () => {
-  const {carts} = useContext(CartContext);
+  // const {carts} = useContext(CartContext);
+  const [carts, setCarts] = useState([]);
+
+  const allCarts = async () => {
+    const data = await cartService.allCarts();
+    console.log(data);
+    setCarts(data);
+  };
+
+  useEffect(() => {
+    allCarts();
+  }, [carts]);
+
   return carts.length === 0 ? (
     <LinearGradient
       colors={[colors.linearGradientOne, colors.linearGradientTwo]}
@@ -35,7 +48,7 @@ const Cart = () => {
           width: responsiveWidth(100),
           // height: responsiveHeight(50),
           justifyContent: 'center',
-          alignItems: 'center'
+          alignItems: 'center',
         }}>
         <Image
           source={require('./../../assets/images/empty.png')}
@@ -62,16 +75,16 @@ const Cart = () => {
             <View style={styles.priceContainer}>
               <View style={styles.priceAndTitle}>
                 <Text style={styles.text}>Total:</Text>
-                <Text style={styles.text}>$152.2</Text>
+                <Text style={styles.text}>{'\u20B9'}152.2</Text>
               </View>
               <View style={styles.priceAndTitle}>
                 <Text style={styles.text}>Shipping:</Text>
-                <Text style={styles.text}>$0.0</Text>
+                <Text style={styles.text}>{'\u20B9'}0.0</Text>
               </View>
               <View style={styles.divider} />
               <View style={styles.priceAndTitle}>
                 <Text style={styles.text}>Grand Total:</Text>
-                <Text style={styles.text}>$0.0</Text>
+                <Text style={styles.text}>{'\u20B9'}0.0</Text>
               </View>
             </View>
           }

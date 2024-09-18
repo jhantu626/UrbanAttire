@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useContext, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import Header from '../components/Header';
 import LinearGradient from 'react-native-linear-gradient';
 import {colors} from '../utils/colors';
@@ -14,10 +14,11 @@ import {responsiveWidth} from 'react-native-responsive-dimensions';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {fonts} from '../utils/fonts';
 import {CartContext} from '../context/CartContext';
-import Toast from 'react-native-toast-message';
+import {ALERT_TYPE, Dialog, Toast} from 'react-native-alert-notification';
+import {cartService} from '../services/CartService';
 
-const sizes = ['S', 'M', 'L', 'XL'];
-const color = ['#91A1B0', '#B11D1DD4', '#1F44A3C2', '#9F632AD4', '#1D752BDB'];
+// const sizes = ['S', 'M', 'L', 'XL'];
+// const color = ['#91A1B0', '#B11D1DD4', '#1F44A3C2', '#9F632AD4', '#1D752BDB'];
 
 const ProductDetails = () => {
   const route = useRoute();
@@ -26,16 +27,58 @@ const ProductDetails = () => {
   const [selectedColor, setSelectedColor] = useState(null);
   const {addCart} = useContext(CartContext);
   const navigation = useNavigation();
+  const [color, setColor] = useState([]);
+  const [sizes, setSizes] = useState([]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    await addCartToDb();
     addCart({...item, color: selectedColor, size: selectedSize});
-    // navigation.navigate('Cart');
-    Toast.show({
-      text1: 'Cart Added Succefull',
-      type: 'success',
-      position: 'bottom',
-    });
+    // Toast.show({
+    //   title: 'Cart Adding',
+    //   textBody: 'Cart Addedd Successfully',
+    //   type: ALERT_TYPE.SUCCESS,
+    // });
   };
+
+  const addCartToDb = async () => {
+    if (selectedSize === null) {
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Please Select A Size',
+        textBody:
+          ' please choose your preferred size from the available options',
+        button: 'close',
+      });
+      return;
+    }
+    if (selectedColor === null) {
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Please Select A Color',
+        textBody:
+          'Choose your favorite color from the options below to match your style perfectly.',
+        button: 'close',
+      });
+      return;
+    }
+    const response = await cartService.addCart(
+      item.id,
+      selectedSize,
+      selectedColor,
+    );
+    console.log(response);
+    Toast.show({
+      title: 'success',
+      textBody: response.msg,
+      type: response.status ? ALERT_TYPE.SUCCESS : ALERT_TYPE.DANGER,
+    });
+    navigation.navigate('Cart');
+  };
+
+  useEffect(() => {
+    setColor(item.colors);
+    setSizes(item.sizes);
+  }, []);
 
   return (
     <LinearGradient
@@ -45,7 +88,11 @@ const ProductDetails = () => {
         <Header isNotHome={true} />
       </View>
       <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
-        <Image source={{uri: item.image}} style={styles.coverImage} />
+        <Image
+          source={{uri: item.imageUrl}}
+          style={styles.coverImage}
+          resizeMode="contain"
+        />
         <View style={styles.contentContainer}>
           <Text style={styles.title}>{item.title}</Text>
           <Text style={styles.price}>${item.price}</Text>
@@ -78,7 +125,7 @@ const ProductDetails = () => {
               key={item}
               style={item === selectedColor ? styles.circleBorder : null}>
               <TouchableOpacity
-                style={[styles.circle, {backgroundColor: item}]}
+                style={[styles.circle, {backgroundColor: item.toLowerCase()}]}
                 onPress={() => setSelectedColor(item)}
               />
             </View>
@@ -88,7 +135,6 @@ const ProductDetails = () => {
           <Text style={styles.btnText}>Add to Cart</Text>
         </TouchableOpacity>
       </ScrollView>
-      <Toast />
     </LinearGradient>
   );
 };

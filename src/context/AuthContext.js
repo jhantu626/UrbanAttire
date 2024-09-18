@@ -11,6 +11,7 @@ export const AuthProvider = ({children}) => {
   const login = async (email, password) => {
     const url = 'http://192.168.43.179:9001/api/v1/auth/login';
     try {
+      console.log("login in authcontext")
       setIsLoading(true);
       const response = await axios.post(url, {
         email,

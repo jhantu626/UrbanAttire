@@ -12,14 +12,14 @@ const ProductCard = ({item, handleLiked}) => {
       style={styles.container}>
       <Image
         source={{
-          uri: item.image,
+          uri: item.imageUrl,
         }}
         // source={require(imageUri)}
         style={styles.coverImage}
       />
       <View style={styles.content}>
         <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.price}>${item.price}</Text>
+        <Text style={styles.price}>{'\u20B9'}{item.price}</Text>
       </View>
       <TouchableOpacity
         style={styles.heartContainer}

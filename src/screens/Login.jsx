@@ -42,6 +42,7 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
+    console.log("handle login")
     if (!validation()) return;
     const result = await login(email, password);
     if (!result.status) {
