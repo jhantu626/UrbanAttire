@@ -13,7 +13,7 @@ import {colors} from '../utils/colors';
 import Header from '../components/Header';
 import CartCard from '../components/CartCard';
 import {fonts} from '../utils/fonts';
-import {useContext, useEffect, useState} from 'react';
+import {useCallback, useContext, useEffect, useState} from 'react';
 import {CartContext} from '../context/CartContext';
 import Toast from 'react-native-toast-message';
 import {
@@ -21,20 +21,41 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {cartService} from '../services/CartService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Cart = () => {
   // const {carts} = useContext(CartContext);
   const [carts, setCarts] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0.0);
 
   const allCarts = async () => {
-    const data = await cartService.allCarts();
-    console.log(data);
-    setCarts(data);
+    try {
+      const data = await cartService.allCarts();
+      setCarts(data.result);
+      console.log(data.totalAmount);
+      setTotalAmount(data.totalAmount);
+      await AsyncStorage.setItem('cartLength', data.result.length.toString());
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const refreshCartPage = async () => {
+    await allCarts();
   };
 
   useEffect(() => {
-    allCarts();
-  }, [carts]);
+    // refreshCartPage();
+
+    const fetchData = async () => {
+      try {
+        await allCarts();
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+  }, []);
 
   return carts.length === 0 ? (
     <LinearGradient
@@ -70,12 +91,17 @@ const Cart = () => {
         <FlatList
           data={carts}
           keyExtractor={item => item}
-          renderItem={data => <CartCard key={data.id} item={data} />}
+          renderItem={data => (
+            <CartCard key={data.id} item={data} refreshCart={allCarts} />
+          )}
           ListFooterComponent={
             <View style={styles.priceContainer}>
               <View style={styles.priceAndTitle}>
                 <Text style={styles.text}>Total:</Text>
-                <Text style={styles.text}>{'\u20B9'}152.2</Text>
+                <Text style={styles.text}>
+                  {'\u20B9'}
+                  {totalAmount}.0
+                </Text>
               </View>
               <View style={styles.priceAndTitle}>
                 <Text style={styles.text}>Shipping:</Text>
@@ -84,7 +110,10 @@ const Cart = () => {
               <View style={styles.divider} />
               <View style={styles.priceAndTitle}>
                 <Text style={styles.text}>Grand Total:</Text>
-                <Text style={styles.text}>{'\u20B9'}0.0</Text>
+                <Text style={styles.text}>
+                  {'\u20B9'}
+                  {totalAmount}.0
+                </Text>
               </View>
             </View>
           }

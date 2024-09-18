@@ -10,11 +10,29 @@ import React, {useContext} from 'react';
 import Octicons from 'react-native-vector-icons/Octicons';
 import {fonts} from '../utils/fonts';
 import {CartContext} from '../context/CartContext';
-import Toast from 'react-native-toast-message';
+import {cartService} from '../services/CartService';
+import {ALERT_TYPE, Toast} from 'react-native-alert-notification';
+import { useEffect } from 'react';
 
-const CartCard = ({item}) => {
+const CartCard = ({item, refreshCart}) => {
   const {removeCart} = useContext(CartContext);
-  console.log(item.item.product.imageUrl);
+  // console.log(item.item);
+
+  const deleteCart = async () => {
+    try {
+      await cartService.deleteCarts(item.item.id);
+      removeCart();
+      Toast.show({
+        title: 'Cart Deleted Successfully',
+        textBody: 'cart deleted',
+        type: ALERT_TYPE.SUCCESS,
+      });
+      await refreshCart();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Image
@@ -38,15 +56,7 @@ const CartCard = ({item}) => {
           </View>
         </View>
       </View>
-      <TouchableOpacity
-        onPress={() => {
-          removeCart(item.item);
-          Toast.show({
-            type: 'success',
-            text1: 'Cart Deleted Succesfully!',
-            position: 'bottom',
-          });
-        }}>
+      <TouchableOpacity onPress={deleteCart}>
         <Octicons name="trash" size={30} color={'#E96E6E'} />
       </TouchableOpacity>
     </View>

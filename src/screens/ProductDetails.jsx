@@ -68,11 +68,11 @@ const ProductDetails = () => {
     );
     console.log(response);
     Toast.show({
-      title: 'success',
-      textBody: response.msg,
-      type: response.status ? ALERT_TYPE.SUCCESS : ALERT_TYPE.DANGER,
+      title: response.msg,
+      textBody: 'Cannot add the same product again.',
+      type: response.status ? ALERT_TYPE.SUCCESS : ALERT_TYPE.INFO,
     });
-    navigation.navigate('Cart');
+    // navigation.navigate('Cart');
   };
 
   useEffect(() => {

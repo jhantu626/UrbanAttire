@@ -48,6 +48,23 @@ class CartService {
       console.error(error);
     }
   }
+
+  async deleteCarts(cartId) {
+    try {
+      const token = await this.getToken();
+      const response = await axios.delete(
+        `${this.baseUrl}/api/v1/cart/${cartId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
 
 export const cartService = new CartService();
