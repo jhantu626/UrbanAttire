@@ -1,10 +1,11 @@
 import axios from 'axios';
 import Cart from '../screens/Cart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {BASE_URL} from '@env';
 
 class CartService {
   constructor() {
-    this.baseUrl = 'http://192.168.43.179:9001';
+    this.baseUrl = BASE_URL;
   }
 
   async getToken() {

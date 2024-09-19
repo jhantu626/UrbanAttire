@@ -6,13 +6,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {fonts} from '../utils/fonts';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Header = ({isNotHome = false, isCart = false, imageUrl = null}) => {
+const Header = ({
+  isNotHome = false,
+  isCart = false,
+  imageUrl = null,
+  title = null,
+}) => {
   const navigation = useNavigation();
   const [profilePic, setProfilePic] = useState(null);
 
@@ -37,16 +42,14 @@ const Header = ({isNotHome = false, isCart = false, imageUrl = null}) => {
         </View>
       )}
       {isCart && <Text style={styles.myCart}>My Cart</Text>}
+      {title && <Text style={styles.myCart}>{title}</Text>}
       {imageUrl === null ? (
         <Image
           style={styles.dp}
           source={require('./../../assets/images/defaultUser.png')}
         />
       ) : (
-        <Image
-          style={styles.dp}
-          source={{uri: imageUrl}}
-        />
+        <Image style={styles.dp} source={{uri: imageUrl}} />
       )}
     </View>
   );

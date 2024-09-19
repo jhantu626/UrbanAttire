@@ -1,8 +1,10 @@
 import axios from 'axios';
+import {BASE_URL} from '@env';
 
 class ProductService {
   constructor() {
-    this.baseUrl = 'http://192.168.43.179:9001';
+    this.baseUrl = BASE_URL;
+    console.log(this.baseUrl);
   }
 
   async allProducts(pageNo, category) {

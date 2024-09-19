@@ -25,7 +25,7 @@ const ProductDetails = () => {
   const {item} = route.params;
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedColor, setSelectedColor] = useState(null);
-  const {addCart} = useContext(CartContext);
+  const {addCart, cartCountAdd} = useContext(CartContext);
   const navigation = useNavigation();
   const [color, setColor] = useState([]);
   const [sizes, setSizes] = useState([]);
@@ -38,6 +38,7 @@ const ProductDetails = () => {
     //   textBody: 'Cart Addedd Successfully',
     //   type: ALERT_TYPE.SUCCESS,
     // });
+    cartCountAdd();
   };
 
   const addCartToDb = async () => {
@@ -69,7 +70,7 @@ const ProductDetails = () => {
     console.log(response);
     Toast.show({
       title: response.msg,
-      textBody: 'Cannot add the same product again.',
+      textBody: !response.status && 'Cannot add the same product again.',
       type: response.status ? ALERT_TYPE.SUCCESS : ALERT_TYPE.INFO,
     });
     // navigation.navigate('Cart');

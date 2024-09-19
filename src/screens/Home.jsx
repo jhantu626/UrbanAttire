@@ -32,13 +32,13 @@ const categories = ['Tranding Now', 'All', 'New', 'Men', 'Women'];
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [products, setProducts] = useState(data.products);
+  const [products, setProducts] = useState([]);
   const [profileImage, setProfileImge] = useState(null);
   const [pageNo, setPageNo] = useState(0);
   const [totalPage, setTotalPage] = useState(0);
   const [isFirst, setIsFirst] = useState(false);
   const [isLast, setIsLast] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const faltListRef = useRef(null);
 
@@ -67,6 +67,7 @@ const Home = () => {
     setTotalPage(total);
     setIsFirst(first);
     setIsLast(last);
+    console.log(data);
     // console.log(content)
   });
 
@@ -75,18 +76,16 @@ const Home = () => {
     syncProfileImage();
     allProducts(pageNo, selectedCategory);
 
-    if (profileImage !== null) {
-      syncProfileImage();
-    }
+    // if (profileImage !== null) {
+    //   syncProfileImage();
+    // }
 
     // scroll to top
     if (faltListRef.current) {
       faltListRef.current.scrollToOffset({animated: 0, offset: 0});
     }
-    setInterval(() => {
-      setIsLoading(prev => false);
-    }, 5000);
-    setIsLoading(prev => false);
+    setIsLoading(false);
+    // setIsLoading(prev => false);
   }, [pageNo, selectedCategory]);
 
   useEffect(() => {

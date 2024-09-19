@@ -1,4 +1,5 @@
 import {
+  AppState,
   FlatList,
   Image,
   ScrollView,
@@ -13,7 +14,14 @@ import {colors} from '../utils/colors';
 import Header from '../components/Header';
 import CartCard from '../components/CartCard';
 import {fonts} from '../utils/fonts';
-import {useCallback, useContext, useEffect, useState} from 'react';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from 'react';
 import {CartContext} from '../context/CartContext';
 import Toast from 'react-native-toast-message';
 import {
@@ -22,19 +30,21 @@ import {
 } from 'react-native-responsive-dimensions';
 import {cartService} from '../services/CartService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import CartShimmer from '../shimmer-screens/CartShimmer';
 
 const Cart = () => {
   // const {carts} = useContext(CartContext);
   const [carts, setCarts] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0.0);
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  const navigation = useNavigation();
 
   const allCarts = async () => {
     try {
       const data = await cartService.allCarts();
       setCarts(data.result);
-      console.log(data.totalAmount);
       setTotalAmount(data.totalAmount);
-      await AsyncStorage.setItem('cartLength', data.result.length.toString());
     } catch (error) {
       console.error(error);
     }
@@ -42,22 +52,27 @@ const Cart = () => {
 
   const refreshCartPage = async () => {
     await allCarts();
+    setIsPageLoading(false);
+  };
+
+  handleCheckout = () => {
+    console.log('checkout');
+    navigation.navigate('PlaceOrder', {carts, totalAmount});
   };
 
   useEffect(() => {
-    // refreshCartPage();
-
-    const fetchData = async () => {
-      try {
-        await allCarts();
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData();
+    refreshCartPage();
   }, []);
 
-  return carts.length === 0 ? (
+  useFocusEffect(
+    useCallback(() => {
+      refreshCartPage();
+    }, []),
+  );
+
+  return isPageLoading ? (
+    <CartShimmer />
+  ) : carts.length === 0 ? (
     <LinearGradient
       colors={[colors.linearGradientOne, colors.linearGradientTwo]}
       style={[
@@ -87,13 +102,15 @@ const Cart = () => {
       <View style={{marginBottom: 10}}>
         <Header isNotHome={true} isCart={true} />
       </View>
-      <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
+      <View style={{flex: 1}} showsVerticalScrollIndicator={false}>
         <FlatList
           data={carts}
-          keyExtractor={item => item}
-          renderItem={data => (
-            <CartCard key={data.id} item={data} refreshCart={allCarts} />
-          )}
+          keyExtractor={item => item.index}
+          renderItem={data => {
+            return (
+              <CartCard key={data.index} item={data} refreshCart={allCarts} />
+            );
+          }}
           ListFooterComponent={
             <View style={styles.priceContainer}>
               <View style={styles.priceAndTitle}>
@@ -118,8 +135,8 @@ const Cart = () => {
             </View>
           }
         />
-      </ScrollView>
-      <TouchableOpacity style={styles.btnCheckout}>
+      </View>
+      <TouchableOpacity onPress={handleCheckout} style={styles.btnCheckout}>
         <Text style={styles.btnText}>Checkout</Text>
       </TouchableOpacity>
       <Toast />

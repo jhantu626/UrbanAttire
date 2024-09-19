@@ -19,6 +19,7 @@ import OnboardingScreen from './screens/OnboardingScreen';
 import LoginHome from './screens/LoginHome';
 import SplashScreen from './screens/SplashScreen';
 import {AlertNotificationRoot} from 'react-native-alert-notification';
+import PlaceOrder from './screens/PlaceOrder';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -56,10 +57,27 @@ const AuthStack = () => {
   );
 };
 
+const CartStack = () => {
+  return (
+    <Stack.Navigator initialRouteName="Cart">
+      <Stack.Screen
+        name="Cart"
+        component={Cart}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="PlaceOrder"
+        component={PlaceOrder}
+        options={{headerShown: false}}
+      />
+    </Stack.Navigator>
+  );
+};
+
 const AppStack = () => {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="CartStack"
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
@@ -84,11 +102,11 @@ const AppStack = () => {
         }}
       />
       <Tab.Screen
-        name="Cart"
-        component={Cart}
+        name="CartStack"
+        component={CartStack}
         options={{
           tabBarIcon: ({size, focused, color}) => {
-            const {carts} = useContext(CartContext);
+            const {cartCount} = useContext(CartContext);
             return (
               <View style={{position: 'relative'}}>
                 <MaterialCommunityIcons name="cart" size={size} color={color} />
@@ -105,7 +123,7 @@ const AppStack = () => {
                     right: -5,
                   }}>
                   <Text style={{color: '#FFFFFF', fontSize: 10}}>
-                    {carts.length}
+                    {cartCount}
                   </Text>
                 </View>
               </View>

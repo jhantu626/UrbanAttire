@@ -1,27 +1,19 @@
-import {
-  Image,
-  StyleSheet,
-  Text,
-  ToastAndroid,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useContext} from 'react';
 import Octicons from 'react-native-vector-icons/Octicons';
 import {fonts} from '../utils/fonts';
 import {CartContext} from '../context/CartContext';
 import {cartService} from '../services/CartService';
 import {ALERT_TYPE, Toast} from 'react-native-alert-notification';
-import { useEffect } from 'react';
 
 const CartCard = ({item, refreshCart}) => {
-  const {removeCart} = useContext(CartContext);
-  // console.log(item.item);
+  const {removeCart, cartCountRemove} = useContext(CartContext);
 
   const deleteCart = async () => {
     try {
-      await cartService.deleteCarts(item.item.id);
-      removeCart();
+      cartCountRemove();
+      const id=await item.item.id;
+      await cartService.deleteCarts(id);
       Toast.show({
         title: 'Cart Deleted Successfully',
         textBody: 'cart deleted',

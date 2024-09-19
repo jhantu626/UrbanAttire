@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, {Axios} from 'axios';
 import {createContext, useEffect, useState} from 'react';
+import {BASE_URL} from '@env';
+import {ViewBase} from 'react-native';
 
 export const AuthContext = createContext();
 
@@ -9,9 +11,9 @@ export const AuthProvider = ({children}) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const login = async (email, password) => {
-    const url = 'http://192.168.43.179:9001/api/v1/auth/login';
+    const url = `${BASE_URL}/api/v1/auth/login`;
     try {
-      console.log("login in authcontext")
+      console.log('login in authcontext');
       setIsLoading(true);
       const response = await axios.post(url, {
         email,
@@ -36,7 +38,7 @@ export const AuthProvider = ({children}) => {
     try {
       console.info('Register function started');
 
-      const URI = 'http://192.168.43.179:9001/api/v1/auth/register';
+      const URI = `${BASE_URL}/api/v1/auth/register`;
 
       const response = await axios.post(URI, {
         email: email,

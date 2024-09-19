@@ -24,6 +24,7 @@ import Address from '../components/Address';
 import {ALERT_TYPE, Toast} from 'react-native-alert-notification';
 import {Buffer} from 'buffer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ProfileShimmer from '../shimmer-screens/ProfileShimmer';
 
 global.Buffer = global.Buffer || Buffer;
 
@@ -35,12 +36,13 @@ const Profile = () => {
   const [isUpdatePh, setIsUpdatePh] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const [imageLoading, setImageLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(true);
 
   const profileData = async () => {
     const data = await userService.profile();
     console.log(data);
     setProfile(data);
-    await AsyncStorage.setItem('profileImageUrl',data.profileUrl);
+    await AsyncStorage.setItem('profileImageUrl', data.profileUrl);
   };
   const updateProfile = async () => {
     const option = {
@@ -104,12 +106,17 @@ const Profile = () => {
   };
 
   useEffect(() => {
+    console.log(isPageLoading);
     profileData();
     setMobile(profile.mobile);
     refreshPage();
+    setIsPageLoading(false);
+    console.log(isPageLoading);
   }, []);
 
-  return (
+  return isPageLoading ? (
+    <ProfileShimmer />
+  ) : (
     <LinearGradient
       style={styles.container}
       colors={[colors.linearGradientOne, colors.linearGradientTwo]}>
@@ -133,7 +140,7 @@ const Profile = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderWidth: 5,
-                  borderColor: '#EE8924'
+                  borderColor: '#EE8924',
                 }}>
                 <ActivityIndicator size={'large'} color={'#EE8924'} />
               </View>
