@@ -20,6 +20,9 @@ import LoginHome from './screens/LoginHome';
 import SplashScreen from './screens/SplashScreen';
 import {AlertNotificationRoot} from 'react-native-alert-notification';
 import PlaceOrder from './screens/PlaceOrder';
+import ConfirmOrder from './screens/ConfirmOrder';
+import Orders from './screens/Orders';
+import OrderDetails from './screens/OrderDetails';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -70,6 +73,22 @@ const CartStack = () => {
         component={PlaceOrder}
         options={{headerShown: false}}
       />
+      <Stack.Screen
+        name="OrderConfirmation"
+        component={ConfirmOrder}
+        options={{headerShown: false}}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const OrderStack = () => {
+  return (
+    <Stack.Navigator
+      initialRouteName="Orders"
+      screenOptions={{headerShown: false}}>
+      <Stack.Screen name="Orders" component={Orders} />
+      <Stack.Screen name="OrderDetails" component={OrderDetails} />
     </Stack.Navigator>
   );
 };
@@ -77,7 +96,7 @@ const CartStack = () => {
 const AppStack = () => {
   return (
     <Tab.Navigator
-      initialRouteName="CartStack"
+      initialRouteName="Home_Stack"
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
@@ -93,8 +112,8 @@ const AppStack = () => {
         }}
       />
       <Tab.Screen
-        name="Reorder"
-        component={Home}
+        name="OrderStack"
+        component={OrderStack}
         options={{
           tabBarIcon: ({size, focused, color}) => {
             return <MaterialIcons name="reorder" size={size} color={color} />;

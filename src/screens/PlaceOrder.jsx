@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   FlatList,
   ScrollView,
   StyleSheet,
@@ -6,14 +7,22 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {colors} from '../utils/colors';
 import Header from '../components/Header';
 import {fonts} from '../utils/fonts';
 import DropDownPicker from 'react-native-dropdown-picker';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  StackActions,
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {ALERT_TYPE, Dialog, Toast} from 'react-native-alert-notification';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {orderService} from '../services/OrderService';
+import {CartContext} from '../context/CartContext';
 
 const PlaceOrder = () => {
   const [editAddress, setEditAddress] = useState(false);
@@ -21,6 +30,9 @@ const PlaceOrder = () => {
   const route = useRoute();
 
   const {carts, totalAmount} = route.params;
+  const [address, setAddress] = useState(null);
+  const [orderLoading, setOrderLoading] = useState(false);
+  const {setCartCount} = useContext(CartContext);
 
   //For Droprown
   const [isOpen, setIsOpen] = useState(false);
@@ -40,6 +52,7 @@ const PlaceOrder = () => {
         type: ALERT_TYPE.WARNING,
         button: 'OK',
       });
+      return;
     }
     if (value === 'UPI' || value === 'CARD') {
       Dialog.show({
@@ -49,20 +62,51 @@ const PlaceOrder = () => {
         type: ALERT_TYPE.WARNING,
         button: 'OK',
       });
+      return;
+    }
+    if (address === null) {
+      Dialog.show({
+        title: 'Address Required',
+        textBody: 'Please add your address before placing an order.',
+        type: ALERT_TYPE.WARNING,
+        button: 'OK',
+      });
+      return;
+    }
+    const result = carts;
+    // console.log(result);
+    setOrderLoading(true);
+    const responseData = await orderService.makeOrder(
+      result,
+      totalAmount,
+      address,
+    );
+    setOrderLoading(false);
+    setCartCount(0);
+    naviagion.dispatch(
+      StackActions.replace('OrderConfirmation', {msg: responseData.msg}),
+    );
+  };
+
+  const syncAddress = async () => {
+    const a = await AsyncStorage.getItem('address');
+    if (a) {
+      setAddress(a);
     }
   };
 
-  useEffect(() => {
-    console.log(carts[0].product.title);
-    console.log(totalAmount);
-  }, [value]);
+  useFocusEffect(
+    useCallback(() => {
+      syncAddress();
+    }, []),
+  );
 
   return (
     <LinearGradient
       style={styles.container}
       colors={[colors.linearGradientOne, colors.linearGradientTwo]}>
       <Header isNotHome={true} title={'Order Here'} />
-      <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
+      <ScrollView style={{flexGrow: 1}} showsVerticalScrollIndicator={false}>
         {/* Order Summery */}
         <View style={styles.summeryContainer}>
           <FlatList
@@ -72,9 +116,8 @@ const PlaceOrder = () => {
             data={carts}
             keyExtractor={data => data.index}
             renderItem={data => {
-              console.log(data);
               return (
-                <View style={styles.orderManuContainer}>
+                <View key={data.index} style={styles.orderManuContainer}>
                   <Text style={styles.itemTitle}>
                     {data.item.product.title}
                   </Text>
@@ -118,7 +161,7 @@ const PlaceOrder = () => {
           </View>
           <View style={{padding: 10}}>
             <Text style={styles.itemTitle}>
-              Gurudas Dutta Garden Lane, Kolkata, 700067, West Bengal
+              {address ? address : 'Please Update Address First'}
             </Text>
           </View>
         </View>
@@ -145,8 +188,15 @@ const PlaceOrder = () => {
         </View>
 
         {/* Order button */}
-        <TouchableOpacity onPress={handleOrder} style={styles.btnContainer}>
-          <Text style={styles.btnText}>Place Order</Text>
+        <TouchableOpacity
+          onPress={handleOrder}
+          style={styles.btnContainer}
+          disabled={orderLoading}>
+          {orderLoading ? (
+            <ActivityIndicator size={'large'} color={'#FFFFFF'} />
+          ) : (
+            <Text style={styles.btnText}>Place Order</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
     </LinearGradient>

@@ -67,7 +67,6 @@ const Home = () => {
     setTotalPage(total);
     setIsFirst(first);
     setIsLast(last);
-    console.log(data);
     // console.log(content)
   });
 

@@ -38,7 +38,6 @@ const ProductDetails = () => {
     //   textBody: 'Cart Addedd Successfully',
     //   type: ALERT_TYPE.SUCCESS,
     // });
-    cartCountAdd();
   };
 
   const addCartToDb = async () => {
@@ -68,6 +67,9 @@ const ProductDetails = () => {
       selectedColor,
     );
     console.log(response);
+    if (response.status) {
+      cartCountAdd();
+    }
     Toast.show({
       title: response.msg,
       textBody: !response.status && 'Cannot add the same product again.',

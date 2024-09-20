@@ -36,6 +36,7 @@ export const CartProvider = ({children}) => {
         cartCount,
         cartCountAdd,
         cartCountRemove,
+        setCartCount
       }}>
       {children}
     </CartContext.Provider>

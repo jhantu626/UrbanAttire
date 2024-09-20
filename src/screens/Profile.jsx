@@ -40,9 +40,13 @@ const Profile = () => {
 
   const profileData = async () => {
     const data = await userService.profile();
-    console.log(data);
     setProfile(data);
     await AsyncStorage.setItem('profileImageUrl', data.profileUrl);
+    if (data.address) {
+      const address = await data.address;
+      const a = `${address.street}, ${address.city}, ${address.postalCode}, ${address.state}`;
+      await AsyncStorage.setItem('address', a);
+    }
   };
   const updateProfile = async () => {
     const option = {

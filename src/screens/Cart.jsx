@@ -59,6 +59,13 @@ const Cart = () => {
     console.log('checkout');
     navigation.navigate('PlaceOrder', {carts, totalAmount});
   };
+  const [profileImage, setProfileImage] = useState(null);
+
+
+  const syncProfileImage = async () => {
+    const data = await AsyncStorage.getItem('profileImageUrl');
+    setProfileImage(data);
+  };
 
   useEffect(() => {
     refreshCartPage();
@@ -67,6 +74,7 @@ const Cart = () => {
   useFocusEffect(
     useCallback(() => {
       refreshCartPage();
+      syncProfileImage();
     }, []),
   );
 
@@ -100,7 +108,7 @@ const Cart = () => {
       colors={[colors.linearGradientOne, colors.linearGradientTwo]}
       style={styles.container}>
       <View style={{marginBottom: 10}}>
-        <Header isNotHome={true} isCart={true} />
+        <Header isNotHome={true} isCart={true} imageUrl={profileImage}/>
       </View>
       <View style={{flex: 1}} showsVerticalScrollIndicator={false}>
         <FlatList
@@ -134,6 +142,7 @@ const Cart = () => {
               </View>
             </View>
           }
+          showsVerticalScrollIndicator={false}
         />
       </View>
       <TouchableOpacity onPress={handleCheckout} style={styles.btnCheckout}>
