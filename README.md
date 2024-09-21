@@ -43,6 +43,20 @@ UrbanAttire is a comprehensive e-commerce shopping application designed to provi
 
 - **Profile**: User profile management screen.
 
+## Snapshots
+### Onboard Screens
+![Onboard](https://github.com/user-attachments/assets/f2a2939f-31c4-4592-a84e-8bfe2dd173a3)
+
+### Authentication Screens
+![Auth](https://github.com/user-attachments/assets/29401341-5440-4361-8218-79727dfe2fa1)
+
+### App Screens
+![app](https://github.com/user-attachments/assets/d9da4862-689a-4037-b14b-1d5eeb40fdea)
+
+### Orders Screens
+![orders](https://github.com/user-attachments/assets/97a6a652-112f-4145-9e25-65e797bbc2da)
+
+
 ## Installation
 
 # 1. Clone the repository
